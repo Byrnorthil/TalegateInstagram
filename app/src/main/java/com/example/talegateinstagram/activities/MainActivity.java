@@ -1,4 +1,4 @@
-package com.example.talegateinstagram;
+package com.example.talegateinstagram.activities;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,10 +18,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.talegateinstagram.R;
 import com.example.talegateinstagram.models.Post;
+import com.example.talegateinstagram.utils.BitmapScaler;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.io.File;
 import java.util.List;
@@ -39,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnPost;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -47,19 +52,58 @@ public class MainActivity extends AppCompatActivity {
         btnTakePicture = findViewById(R.id.btnTakePicture);
         ivPicture = findViewById(R.id.ivPicture);
         btnPost = findViewById(R.id.btnPost);
+
+        btnTakePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onLaunchCamera(view);
+            }
+        });
+
+        btnPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String description = etDescription.getText().toString();
+                ParseUser user = ParseUser.getCurrentUser();
+                savePost(description, user, photoFile);
+            }
+        });
+    }
+
+    private void savePost(String description, ParseUser user, File photoFile) {
+        if (ivPicture.getDrawable() == null) {
+            displayMessage("There is no photo!");
+        } else {
+            Post post = new Post();
+            post.setDescription(description);
+            post.setUser(user);
+            post.setImage(new ParseFile(photoFile));
+            post.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        etDescription.setText("");
+                        ivPicture.setImageResource(0);
+                    } else {
+                        Log.e(TAG, "Parse exception thrown", e);
+                        displayMessage("Problem saving post");
+                    }
+                }
+            });
+        }
     }
 
     public void onLaunchCamera(View view) {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         photoFile = getPhotoFileUri(photoFileName);
 
-        Uri fileProvider = FileProvider.getUriForFile(MainActivity.this, "com.talegate.fileprovider", photoFile);
+        Uri fileProvider = FileProvider.getUriForFile(this, "com.talegate.fileprovider", photoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, CAPTURE_IMAGE_REQUEST_CODE);
         } else {
-            Toast.makeText(this, "You don't have an available camera app!", Toast.LENGTH_LONG).show();
+            displayMessage("You don't have an available camera app!");
         }
     }
 
@@ -70,8 +114,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Failed to create directory");
         }
 
-        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
-        return file;
+        return new File(mediaStorageDir.getPath() + File.separator + fileName);
     }
 
     @Override
@@ -85,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                     Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, 250);
                     ivPicture.setImageBitmap(resizedBitmap);
                 } else {
-                    Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+                    displayMessage("Picture wasn't taken");
                 }
                 break;
             default:
@@ -103,5 +146,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void displayMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

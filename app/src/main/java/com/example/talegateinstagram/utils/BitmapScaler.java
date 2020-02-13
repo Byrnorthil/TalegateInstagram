@@ -1,4 +1,4 @@
-package com.example.talegateinstagram;
+package com.example.talegateinstagram.utils;
 
 import android.graphics.Bitmap;
 
