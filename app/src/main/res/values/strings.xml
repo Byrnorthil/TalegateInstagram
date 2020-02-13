@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">TalegateInstagram</string>
+    <string name="enter_username">Enter your email or username</string>
+    <string name="enter_password">Enter your password</string>
+    <string name="login">Login</string>
+    <string name="describe">Describe this photo...</string>
+    <string name="take_picture">Take picture</string>
+    <string name="your_photo">Your photo</string>
+    <string name="post">Post!</string>
+</resources>
