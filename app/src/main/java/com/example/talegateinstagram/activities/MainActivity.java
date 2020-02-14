@@ -3,6 +3,7 @@ package com.example.talegateinstagram.activities;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -16,9 +17,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.talegateinstagram.R;
+import com.example.talegateinstagram.fragments.LogoutDialogFragment;
 import com.example.talegateinstagram.models.Post;
 import com.example.talegateinstagram.utils.BitmapScaler;
 import com.parse.FindCallback;
@@ -28,10 +31,13 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LogoutDialogFragment.OnLogoutListener {
 
     public static final String TAG = "MainActivity";
     public static final int CAPTURE_IMAGE_REQUEST_CODE = 1034;
@@ -42,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnTakePicture;
     private ImageView ivPicture;
     private Button btnPost;
+    private ProgressBar pbImage;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -52,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         btnTakePicture = findViewById(R.id.btnTakePicture);
         ivPicture = findViewById(R.id.ivPicture);
         btnPost = findViewById(R.id.btnPost);
+        pbImage = findViewById(R.id.pbImage);
 
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                pbImage.setVisibility(View.VISIBLE);
                 String description = etDescription.getText().toString();
                 ParseUser user = ParseUser.getCurrentUser();
                 savePost(description, user, photoFile);
@@ -84,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
                     if (e == null) {
                         etDescription.setText("");
                         ivPicture.setImageResource(0);
+                        pbImage.setVisibility(View.INVISIBLE);
+                        displayMessage("Image successfully posted!");
                     } else {
                         Log.e(TAG, "Parse exception thrown", e);
                         displayMessage("Problem saving post");
@@ -100,21 +111,25 @@ public class MainActivity extends AppCompatActivity {
         Uri fileProvider = FileProvider.getUriForFile(this, "com.talegate.fileprovider", photoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, CAPTURE_IMAGE_REQUEST_CODE);
-        } else {
+        if (intent.resolveActivity(getPackageManager()) == null) {
             displayMessage("You don't have an available camera app!");
+        } else {
+            startActivityForResult(intent, CAPTURE_IMAGE_REQUEST_CODE);
         }
     }
 
+    @NotNull
+    @Contract("_ -> new")
     private File getPhotoFileUri(String fileName) {
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
 
         if(!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
             Log.e(TAG, "Failed to create directory");
-        }
+            return null;
+        } else {
+            return new File(mediaStorageDir.getPath() + File.separator + fileName);
 
-        return new File(mediaStorageDir.getPath() + File.separator + fileName);
+        }
     }
 
     @Override
@@ -150,5 +165,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getSupportFragmentManager();
+        LogoutDialogFragment alert = LogoutDialogFragment.newInstance();
+        alert.show(fm, "logout_alert");
+    }
+
+    @Override
+    public void onLogout(boolean log) {
+        if (log) {
+            ParseUser.logOut();
+            super.onBackPressed();
+        }
     }
 }

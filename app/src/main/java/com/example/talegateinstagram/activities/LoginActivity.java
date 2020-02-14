@@ -47,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void done(ParseUser user, ParseException e) {
                 if (e == null) {
+                    etUsername.setText("");
+                    etPassword.setText("");
                     goMainActivity();
                 } else {
                     displayMessage(e.getMessage());
@@ -63,6 +65,5 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "We have liftoff.");
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
-        finish();
     }
 }
