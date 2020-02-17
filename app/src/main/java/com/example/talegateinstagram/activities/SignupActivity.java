@@ -3,7 +3,9 @@ package com.example.talegateinstagram.activities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +28,8 @@ public class SignupActivity extends AppCompatActivity {
     private EditText etConfirm;
     private Button btnSignup;
 
+    private SharedPreferences pref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +41,8 @@ public class SignupActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         etConfirm = findViewById(R.id.etConfirm);
         btnSignup = findViewById(R.id.btnSignup);
+
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
 
         btnSignup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,7 +64,7 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
-    private void signUp(String username, String handle, String email, String password) {
+    private void signUp(final String username, String handle, String email, final String password) {
         ParseUser user = new ParseUser();
         user.setUsername(username);
         user.setEmail(email);
@@ -68,6 +74,7 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
+                    saveUser(username, password);
                     goMainActivity();
                 } else {
                     displayMessage(e.getMessage());
@@ -85,5 +92,12 @@ public class SignupActivity extends AppCompatActivity {
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
         finish();
+    }
+
+    private void saveUser(String username, String password) {
+        SharedPreferences.Editor edit = pref.edit();
+        edit.putString("username", username);
+        edit.putString("password", password);
+        edit.apply();
     }
 }

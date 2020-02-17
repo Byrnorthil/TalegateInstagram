@@ -22,12 +22,12 @@ public class LoginActivity extends AppCompatActivity {
 
     public static final String TAG = "LoginActivity";
 
-    private SharedPreferences pref;
-
     private EditText etUsername;
     private EditText etPassword;
     private Button btnLogin;
     private Button btnSignup;
+
+    private SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
