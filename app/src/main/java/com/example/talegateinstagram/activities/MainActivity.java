@@ -6,11 +6,13 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -50,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
     private Button btnPost;
     private ProgressBar pbImage;
 
+    private SharedPreferences pref;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
         ivPicture = findViewById(R.id.ivPicture);
         btnPost = findViewById(R.id.btnPost);
         pbImage = findViewById(R.id.pbImage);
+
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
 
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,12 +99,12 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
                     if (e == null) {
                         etDescription.setText("");
                         ivPicture.setImageResource(0);
-                        pbImage.setVisibility(View.INVISIBLE);
                         displayMessage("Image successfully posted!");
                     } else {
                         Log.e(TAG, "Parse exception thrown", e);
                         displayMessage("Problem saving post");
                     }
+                    pbImage.setVisibility(View.INVISIBLE);
                 }
             });
         }
@@ -178,6 +184,10 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
     public void onLogout(boolean log) {
         if (log) {
             ParseUser.logOut();
+            SharedPreferences.Editor edit = pref.edit();
+            edit.remove("username");
+            edit.remove("password");
+            edit.commit();
             super.onBackPressed();
         }
     }
