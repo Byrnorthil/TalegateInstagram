@@ -19,6 +19,12 @@ android {
     }
 }
 
+ext {
+    appCompatVersion = '1.1.0'
+    designSupportVersion = '1.1.0'
+    recyclerViewVersion = '1.1.0'
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -30,6 +36,10 @@ dependencies {
 
     implementation 'com.parse.bolts:bolts-android:1.4.0'
     implementation 'com.github.parse-community.Parse-SDK-Android:parse:1.20.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
     // for logging API calls to LogCat
+
+    implementation "androidx.appcompat:appcompat:${appCompatVersion}"
+    implementation "com.google.android.material:material:${designSupportVersion}"
+    implementation "androidx.recyclerview:recyclerview:${recyclerViewVersion}"
 }

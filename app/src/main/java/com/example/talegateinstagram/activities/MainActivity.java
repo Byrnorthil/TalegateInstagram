@@ -1,5 +1,6 @@
 package com.example.talegateinstagram.activities;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -15,6 +16,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +28,8 @@ import com.example.talegateinstagram.R;
 import com.example.talegateinstagram.fragments.LogoutDialogFragment;
 import com.example.talegateinstagram.models.Post;
 import com.example.talegateinstagram.utils.BitmapScaler;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -46,11 +50,9 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
     public String photoFileName = "photo.jpg";
     private File photoFile;
 
-    private EditText etDescription;
-    private Button btnTakePicture;
-    private ImageView ivPicture;
-    private Button btnPost;
-    private ProgressBar pbImage;
+
+
+    private BottomNavigationView bottomNavigationView;
 
     private SharedPreferences pref;
 
@@ -59,11 +61,7 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        etDescription = findViewById(R.id.etDescription);
-        btnTakePicture = findViewById(R.id.btnTakePicture);
-        ivPicture = findViewById(R.id.ivPicture);
-        btnPost = findViewById(R.id.btnPost);
-        pbImage = findViewById(R.id.pbImage);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         pref = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -81,6 +79,23 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
                 String description = etDescription.getText().toString();
                 ParseUser user = ParseUser.getCurrentUser();
                 savePost(description, user, photoFile);
+            }
+        });
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_home:
+                        displayMessage("Home");
+                        break;
+                    case R.id.action_compose:
+                        displayMessage("Compose");
+                        break;
+                    case R.id.action_profile:
+                        displayMessage("Profile");
+                        break;
+                }
+                return true;
             }
         });
     }
