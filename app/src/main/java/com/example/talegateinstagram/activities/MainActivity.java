@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
@@ -25,7 +26,9 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.talegateinstagram.R;
+import com.example.talegateinstagram.fragments.ComposeFragment;
 import com.example.talegateinstagram.fragments.LogoutDialogFragment;
+import com.example.talegateinstagram.fragments.PostsFragment;
 import com.example.talegateinstagram.models.Post;
 import com.example.talegateinstagram.utils.BitmapScaler;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -55,24 +58,31 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
         setContentView(R.layout.activity_main);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        final FragmentManager fragmentManager = getSupportFragmentManager();
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Fragment fragment;
                 switch (item.getItemId()) {
                     case R.id.action_home:
-                        displayMessage("Home");
+                        fragment = new PostsFragment();
                         break;
                     case R.id.action_compose:
-                        displayMessage("Compose");
+                        fragment = new ComposeFragment();
                         break;
                     case R.id.action_profile:
                         displayMessage("Profile");
+                        fragment = new ComposeFragment();
                         break;
+                    default:
+                        throw new IllegalArgumentException("An invalid ID was passed");
                 }
+                fragmentManager.beginTransaction().replace(R.id.flContainer, fragment).commit();
                 return true;
             }
         });
+        bottomNavigationView.setSelectedItemId(R.id.action_home);
     }
 
     private void displayMessage(String message) {

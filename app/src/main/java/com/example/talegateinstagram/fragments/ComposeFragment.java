@@ -48,7 +48,7 @@ public class ComposeFragment extends Fragment {
     private Button btnPost;
     private ProgressBar pbImage;
 
-    public static String TAG = "ComposeActivity";
+    public static String TAG = "ComposeFragment";
     public static final int CAPTURE_IMAGE_REQUEST_CODE = 1034;
     public String photoFileName = "photo.jpg";
     private File photoFile;
@@ -107,7 +107,7 @@ public class ComposeFragment extends Fragment {
                 if (resultCode == RESULT_OK) {
                     Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
                     Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
-                    Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, 250);
+                    Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, 300);
                     ivPicture.setImageBitmap(resizedBitmap);
                 } else {
                     displayMessage("Picture wasn't taken");
@@ -161,15 +161,5 @@ public class ComposeFragment extends Fragment {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private void queryPosts() {
-        ParseQuery<Post> postParseQuery = new ParseQuery<Post>(Post.class);
-        postParseQuery.findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> posts, ParseException e) {
-                for (Post post: posts) {
-                    Log.d(TAG, "Post: " + post.getDescription());
-                }
-            }
-        });
-    }
+
 }
