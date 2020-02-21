@@ -27,16 +27,11 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
     private Button btnSignup;
 
-    private SharedPreferences pref;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
-        String prevUsername = pref.getString("username", "n/a");
-        String prevPassword = pref.getString("password", "n/a");
-        if (!(prevUsername.equals("n/a") || prevPassword.equals("n/a"))) {
-            login(prevUsername, prevPassword);
+        if (ParseUser.getCurrentUser() != null) {
+            goMainActivity();
         }
 
         super.onCreate(savedInstanceState);
@@ -73,7 +68,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void done(ParseUser user, ParseException e) {
                 if (e == null) {
-                    saveUser(username, password);
                     etUsername.setText("");
                     etPassword.setText("");
                     goMainActivity();
@@ -91,12 +85,5 @@ public class LoginActivity extends AppCompatActivity {
     private void goMainActivity() {
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
-    }
-
-    private void saveUser(String username, String password) {
-        SharedPreferences.Editor edit = pref.edit();
-        edit.putString("username", username);
-        edit.putString("password", password);
-        edit.apply();
     }
 }

@@ -46,15 +46,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements LogoutDialogFragment.OnLogoutListener {
 
     public static final String TAG = "MainActivity";
-    public static final int CAPTURE_IMAGE_REQUEST_CODE = 1034;
-    public String photoFileName = "photo.jpg";
-    private File photoFile;
-
-
 
     private BottomNavigationView bottomNavigationView;
-
-    private SharedPreferences pref;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -63,24 +56,6 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
-
-        btnTakePicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onLaunchCamera(view);
-            }
-        });
-
-        btnPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                pbImage.setVisibility(View.VISIBLE);
-                String description = etDescription.getText().toString();
-                ParseUser user = ParseUser.getCurrentUser();
-                savePost(description, user, photoFile);
-            }
-        });
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -100,90 +75,6 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
         });
     }
 
-    private void savePost(String description, ParseUser user, File photoFile) {
-        if (ivPicture.getDrawable() == null) {
-            displayMessage("There is no photo!");
-        } else {
-            Post post = new Post();
-            post.setDescription(description);
-            post.setUser(user);
-            post.setImage(new ParseFile(photoFile));
-            post.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e == null) {
-                        etDescription.setText("");
-                        ivPicture.setImageResource(0);
-                        displayMessage("Image successfully posted!");
-                    } else {
-                        Log.e(TAG, "Parse exception thrown", e);
-                        displayMessage("Problem saving post");
-                    }
-                    pbImage.setVisibility(View.INVISIBLE);
-                }
-            });
-        }
-    }
-
-    public void onLaunchCamera(View view) {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        photoFile = getPhotoFileUri(photoFileName);
-
-        Uri fileProvider = FileProvider.getUriForFile(this, "com.talegate.fileprovider", photoFile);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
-
-        if (intent.resolveActivity(getPackageManager()) == null) {
-            displayMessage("You don't have an available camera app!");
-        } else {
-            startActivityForResult(intent, CAPTURE_IMAGE_REQUEST_CODE);
-        }
-    }
-
-    @NotNull
-    @Contract("_ -> new")
-    private File getPhotoFileUri(String fileName) {
-        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
-
-        if(!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
-            Log.e(TAG, "Failed to create directory");
-            return null;
-        } else {
-            return new File(mediaStorageDir.getPath() + File.separator + fileName);
-
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case CAPTURE_IMAGE_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
-                    Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
-                    Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
-                    Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, 250);
-                    ivPicture.setImageBitmap(resizedBitmap);
-                } else {
-                    displayMessage("Picture wasn't taken");
-                }
-                break;
-            default:
-                Log.d(TAG, "Some other request code was given");
-        }
-    }
-
-    private void queryPosts() {
-        ParseQuery<Post> postParseQuery = new ParseQuery<Post>(Post.class);
-        postParseQuery.findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> posts, ParseException e) {
-                for (Post post: posts) {
-                    Log.d(TAG, "Post: " + post.getDescription());
-                }
-            }
-        });
-    }
-
     private void displayMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
@@ -199,10 +90,6 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
     public void onLogout(boolean log) {
         if (log) {
             ParseUser.logOut();
-            SharedPreferences.Editor edit = pref.edit();
-            edit.remove("username");
-            edit.remove("password");
-            edit.commit();
             super.onBackPressed();
         }
     }
