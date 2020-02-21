@@ -1,7 +1,6 @@
 package com.example.talegateinstagram.fragments;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.talegateinstagram.models.Post;
 import com.parse.FindCallback;
@@ -31,9 +30,5 @@ public class ProfileFragment extends PostsFragment {
                 }
             }
         });
-    }
-
-    private void displayMessage(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 }

@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.talegateinstagram.R;
 import com.example.talegateinstagram.adapters.PostsAdapter;
@@ -32,6 +33,7 @@ import java.util.List;
 public class PostsFragment extends Fragment {
 
     private RecyclerView rvPosts;
+    private SwipeRefreshLayout swipeContainer;
     public static final String TAG = "PostsFragment";
     protected PostsAdapter adapter;
     protected List<Post> allPosts;
@@ -51,10 +53,23 @@ public class PostsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         rvPosts = view.findViewById(R.id.rvPosts);
+        swipeContainer = view.findViewById(R.id.swipeContainer);
         allPosts = new ArrayList<>();
         adapter = new PostsAdapter(getContext(), allPosts);
         rvPosts.setAdapter(adapter);
         rvPosts.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                queryPosts();
+            }
+        });
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
         queryPosts();
     }
 
@@ -67,17 +82,19 @@ public class PostsFragment extends Fragment {
             @Override
             public void done(List<Post> posts, ParseException e) {
                 if (e == null) {
+                    allPosts.clear();
                     allPosts.addAll(posts);
                     adapter.notifyDataSetChanged();
                 } else {
                     displayMessage("There was an error getting posts");
                     Log.e(TAG, "Parse exception in query", e);
                 }
+                swipeContainer.setRefreshing(false);
             }
         });
     }
 
-    private void displayMessage(String message) {
+    protected void displayMessage(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 }
