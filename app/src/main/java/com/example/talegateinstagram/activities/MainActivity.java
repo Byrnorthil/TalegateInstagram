@@ -1,5 +1,6 @@
 package com.example.talegateinstagram.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -70,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements LogoutDialogFragm
     public void onLogout(boolean log) {
         if (log) {
             ParseUser.logOut();
-            super.onBackPressed();
+            Intent i = new Intent(this, LoginActivity.class);
+            startActivity(i);
         }
     }
 }

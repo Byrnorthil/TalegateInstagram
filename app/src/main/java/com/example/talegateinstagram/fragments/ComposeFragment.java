@@ -25,10 +25,8 @@ import androidx.fragment.app.Fragment;
 import com.example.talegateinstagram.R;
 import com.example.talegateinstagram.models.Post;
 import com.example.talegateinstagram.utils.BitmapScaler;
-import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -36,7 +34,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -121,15 +118,13 @@ public class ComposeFragment extends Fragment {
     @NotNull
     @Contract("_ -> new")
     private File getPhotoFileUri(String fileName) {
-        File mediaStorageDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
+        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES, TAG));
 
-        if(!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
             Log.e(TAG, "Failed to create directory");
-            return null;
-        } else {
-            return new File(mediaStorageDir.getPath() + File.separator + fileName);
-
         }
+
+        return new File(mediaStorageDir.getPath() + File.separator + fileName);
     }
 
     private void savePost(String description, ParseUser user, File photoFile) {
