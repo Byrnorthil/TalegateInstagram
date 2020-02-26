@@ -118,7 +118,7 @@ public class ComposeFragment extends Fragment {
     @NotNull
     @Contract("_ -> new")
     private File getPhotoFileUri(String fileName) {
-        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES, TAG));
+        File mediaStorageDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
 
         if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
             Log.e(TAG, "Failed to create directory");
